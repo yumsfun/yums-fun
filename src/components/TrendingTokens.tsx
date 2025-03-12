@@ -46,17 +46,17 @@ const MOCK_TOKENS: Token[] = [
     contractAddress: 'So11111111111111111111111111111111111111112'
   },
   {
-    id: 'bonk',
-    name: 'BONK',
-    symbol: 'BONK',
-    logo: '/tokens/bonk.png',
-    marketCap: 5800000,
-    priceChange24h: 12.7,
+    id: 'usdc',
+    name: 'USD Coin',
+    symbol: 'USDC',
+    logo: '/tokens/usdc.png',
+    marketCap: 28400000,
+    priceChange24h: 0.1,
     createdAt: new Date(),
-    creatorAddress: '8T4vXWCwJ2JGfVaVVp2Vb2DVJTuuHkzECMgL3nRr2pZ',
-    replies: 156,
-    description: 'The first Solana dog coin for the people, by the people.',
-    contractAddress: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+    creatorAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    replies: 98,
+    description: 'USDC is a fully collateralized US dollar stablecoin powered by Solana.',
+    contractAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
   }
 ];
 
