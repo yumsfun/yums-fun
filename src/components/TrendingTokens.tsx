@@ -8,8 +8,57 @@ import { getTokensRealtimeWithFirestore } from '@/firebase/firestoreService';
 import { Token } from '@/firebase/types';
 import { Timestamp } from 'firebase/firestore';
 
-// Empty tokens array - we'll fetch real tokens from the database later
-const MOCK_TOKENS: Token[] = [];
+// Mock tokens array with correct image paths
+const MOCK_TOKENS: Token[] = [
+  {
+    id: 'bwirt',
+    name: 'BWIRT',
+    symbol: 'BWIRT',
+    logo: '/tokens/bwirt.jpg',
+    marketCap: 4200000,
+    priceChange24h: 8.3,
+    createdAt: new Date(),
+    creatorAddress: '9XyPJ7WsYsQF3hGrFqgMrL9LGy7nKeDVM5L3F9WvVJjZ',
+    replies: 7
+  },
+  {
+    id: 'fat-vance',
+    name: 'FAT VANCE',
+    symbol: 'FANCE',
+    logo: '/tokens/fv.jpg',
+    marketCap: 3700000,
+    priceChange24h: 15.8,
+    createdAt: new Date(),
+    creatorAddress: '7nZbHGwzFJ9Dz8uBeRLnmJeBrUVMS8C8YoycjgE3XJ11',
+    replies: 12
+  },
+  {
+    id: 'sol',
+    name: 'Wrapped SOL',
+    symbol: 'SOL',
+    logo: '/tokens/sol.png',
+    marketCap: 40000000,
+    priceChange24h: 2.5,
+    createdAt: new Date(),
+    creatorAddress: 'So11111111111111111111111111111111111111112',
+    replies: 234,
+    description: 'Wrapped SOL is the native token of the Solana blockchain wrapped for DeFi applications.',
+    contractAddress: 'So11111111111111111111111111111111111111112'
+  },
+  {
+    id: 'bonk',
+    name: 'BONK',
+    symbol: 'BONK',
+    logo: '/tokens/bonk.png',
+    marketCap: 5800000,
+    priceChange24h: 12.7,
+    createdAt: new Date(),
+    creatorAddress: '8T4vXWCwJ2JGfVaVVp2Vb2DVJTuuHkzECMgL3nRr2pZ',
+    replies: 156,
+    description: 'The first Solana dog coin for the people, by the people.',
+    contractAddress: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+  }
+];
 
 // Format market cap to readable format
 const formatMarketCap = (value: number) => {
@@ -49,10 +98,21 @@ const getTimeSinceCreation = (timestamp: number | Date | Timestamp) => {
 };
 
 const CompactTokenCard: FC<{token: Token; index: number}> = ({ token, index }) => {
+  // Determine the correct link path based on token ID
+  const tokenPath = `/token/${token.id}`;
+    
   return (
-    <Link href={`/token/${token.id}`}>
-      <div className={`glass hover:bg-navy-400/50 border border-navy-300/20 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer mb-3 transform hover:-translate-y-1 hover:shadow-lg animate-fadeIn`} style={{ animationDelay: `${index * 100}ms` }}>
-        <div className="p-4">
+    <Link href={tokenPath}>
+      <div 
+        className={`glass hover:bg-navy-400/50 border border-navy-300/20 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer mb-3 transform hover:-translate-y-1 hover:shadow-lg animate-fadeIn relative ${
+          token.id === 'bwirt' ? 'before:absolute before:inset-0 before:rounded-xl before:animate-rainbow-border before:z-[-1]' : ''
+        }`} 
+        style={{ 
+          animationDelay: `${index * 100}ms`,
+          ...(token.id === 'bwirt' ? { padding: '1px' } : {})
+        }}
+      >
+        <div className={`p-4 rounded-xl ${token.id === 'bwirt' ? 'bg-navy-500' : ''}`}>
           <div className="flex items-center gap-4">
             {/* Token Logo */}
             <div className="relative h-12 w-12 rounded-full overflow-hidden bg-navy-400 shadow-md ring-2 ring-primary/20 hover-glow">
@@ -205,6 +265,18 @@ const TrendingTokens: FC = () => {
 
   return (
     <div>
+      <style jsx global>{`
+        @keyframes rainbow-border {
+          0% { background: linear-gradient(45deg, #ff0000, #ff7300, #00ff00, #0000ff, #ff0000); background-size: 400% 100%; }
+          100% { background: linear-gradient(45deg, #ff0000, #ff7300, #00ff00, #0000ff, #ff0000); background-size: 400% 100%; background-position: 100% 50%; }
+        }
+        
+        .animate-rainbow-border {
+          animation: rainbow-border 4s linear infinite;
+          background-size: 400% 100%;
+        }
+      `}</style>
+      
       {/* Header with tabs and options */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3">
         <div className="flex">
