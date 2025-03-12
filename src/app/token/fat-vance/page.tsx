@@ -1,61 +1,29 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import PriceChart from '@/components/PriceChart';
-import { getTokenById } from '@/firebase/tokenService';
 import { Token } from '@/firebase/types';
 
-// Fallback token data
-const FALLBACK_TOKEN_DATA: Token = {
-  id: 'bwirt',
-  name: 'BWIRT',
-  symbol: 'BWIRT',
-  logo: '/tokens/bwirt.jpg',
-  description: 'The most powerful memecoin on Solana. BWIRT is a community-driven token with a focus on innovation and engagement.',
-  marketCap: 4200000,
-  volume24h: 850000,
-  holders: 2100,
-  priceChange24h: 15.2,
-  createdAt: new Date('2023-06-15T12:30:00Z'),
+// Token data
+const FANCE_TOKEN_DATA: Token = {
+  id: 'fat-vance',
+  name: 'FAT VANCE',
+  symbol: 'FANCE',
+  logo: '/tokens/fv.jpg',
+  description: 'FAT VANCE is a pioneering token in the Solana ecosystem, known for its innovative approach to DeFi and strong community engagement.',
+  marketCap: 3700000,
+  priceChange24h: 15.8,
+  createdAt: new Date('2023-12-01'),
   creatorAddress: '7nZbHGwzFJ9Dz8uBeRLnmJeBrUVMS8C8YoycjgE3XJ11',
-  contractAddress: 'BWiRTzh9xFjRJMJvKG5qUHMNXqKxYCxNPDeRjnMz4cF',
-  replies: 0
+  contractAddress: '7nZbHGwzFJ9Dz8uBeRLnmJeBrUVMS8C8YoycjgE3XJ11',
+  replies: 12
 };
 
-export default function TokenDetailPage() {
-  const params = useParams();
-  const tokenId = typeof params?.id === 'string' ? params.id : '';
+export default function FatVanceTokenPage() {
   const [buyAmount, setBuyAmount] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
-  const [token, setToken] = useState<Token | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchToken = async () => {
-      if (typeof tokenId !== 'string') return;
-      
-      try {
-        setLoading(true);
-        const tokenData = await getTokenById(tokenId);
-        setToken(tokenData);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching token:', error);
-        setError('Failed to load token data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchToken();
-  }, [tokenId]);
-  
-  // Use token data or fallback
-  const tokenData = token || FALLBACK_TOKEN_DATA;
   
   // Format market cap to readable format
   const formatValue = (value: number) => {
@@ -90,42 +58,9 @@ export default function TokenDetailPage() {
   
   const calculateTokenAmount = () => {
     const solAmount = parseFloat(buyAmount) || 0;
-    // Mock price calculation
-    return (solAmount / 0.005).toFixed(2);
+    // Mock price calculation (1 SOL = 500 FANCE)
+    return (solAmount * 500).toFixed(0);
   };
-  
-  if (loading) {
-    return (
-      <main className="min-h-screen">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-  
-  if (error) {
-    return (
-      <main className="min-h-screen">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-navy-600 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Error</h2>
-            <p className="text-gray-300">{error}</p>
-            <button 
-              className="btn btn-primary mt-6"
-              onClick={() => window.location.href = '/'}
-            >
-              Back to Home
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
   
   return (
     <main className="min-h-screen">
@@ -136,23 +71,17 @@ export default function TokenDetailPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
           <div className="flex items-center mb-4 md:mb-0">
             <div className="relative h-16 w-16 mr-4 rounded-full overflow-hidden bg-navy-400">
-              {tokenData.logo ? (
-                <Image
-                  src={tokenData.logo}
-                  alt={`${tokenData.name} logo`}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary text-navy font-bold text-2xl">
-                  {tokenData.symbol.charAt(0)}
-                </div>
-              )}
+              <Image
+                src={FANCE_TOKEN_DATA.logo}
+                alt={`${FANCE_TOKEN_DATA.name} logo`}
+                fill
+                className="object-cover"
+              />
             </div>
             
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">{tokenData.name}</h1>
-              <p className="text-gray-400">${tokenData.symbol}</p>
+              <h1 className="text-2xl md:text-3xl font-bold">{FANCE_TOKEN_DATA.name}</h1>
+              <p className="text-gray-400">${FANCE_TOKEN_DATA.symbol}</p>
             </div>
           </div>
           
@@ -173,7 +102,7 @@ export default function TokenDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Chart and Stats */}
           <div className="lg:col-span-2 space-y-6">
-            <PriceChart tokenId={tokenId} />
+            <PriceChart tokenId="fat-vance" />
             
             <div className="bg-navy-600 rounded-xl p-4">
               <h3 className="font-bold mb-4">Token Stats</h3>
@@ -181,25 +110,25 @@ export default function TokenDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-gray-400 text-sm">Market Cap</p>
-                  <p className="font-medium">{formatValue(tokenData.marketCap)}</p>
+                  <p className="font-medium">{formatValue(FANCE_TOKEN_DATA.marketCap)}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">24h Volume</p>
-                  <p className="font-medium">{formatValue(tokenData.marketCap * 0.2)}</p>
+                  <p className="font-medium">{formatValue(FANCE_TOKEN_DATA.marketCap * 0.2)}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Holders</p>
-                  <p className="font-medium">{Math.floor(tokenData.marketCap / 2000).toLocaleString()}</p>
+                  <p className="font-medium">{Math.floor(FANCE_TOKEN_DATA.marketCap / 2000).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">24h Change</p>
-                  <p className={`font-medium ${tokenData.priceChange24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {tokenData.priceChange24h > 0 ? '+' : ''}{tokenData.priceChange24h.toFixed(2)}%
+                  <p className={`font-medium ${FANCE_TOKEN_DATA.priceChange24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {FANCE_TOKEN_DATA.priceChange24h > 0 ? '+' : ''}{FANCE_TOKEN_DATA.priceChange24h.toFixed(2)}%
                   </p>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Created</p>
-                  <p className="font-medium">{getTimeSinceCreation(tokenData.createdAt)}</p>
+                  <p className="font-medium">{getTimeSinceCreation(FANCE_TOKEN_DATA.createdAt)}</p>
                 </div>
               </div>
             </div>
@@ -225,7 +154,7 @@ export default function TokenDetailPage() {
                   }`}
                   onClick={() => setActiveTab('comments')}
                 >
-                  Comments
+                  Comments ({FANCE_TOKEN_DATA.replies})
                 </button>
                 <button
                   className={`px-4 py-3 font-medium text-sm transition-colors ${
@@ -242,22 +171,22 @@ export default function TokenDetailPage() {
               <div className="p-4">
                 {activeTab === 'overview' && (
                   <div>
-                    <p className="text-gray-300 mb-4">{tokenData.description || 'No description available'}</p>
+                    <p className="text-gray-300 mb-4">{FANCE_TOKEN_DATA.description}</p>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Contract Address</span>
                         <span className="text-primary">
-                          {tokenData.contractAddress 
-                            ? `${tokenData.contractAddress.substring(0, 6)}...${tokenData.contractAddress.substring(tokenData.contractAddress.length - 4)}`
+                          {FANCE_TOKEN_DATA.contractAddress 
+                            ? `${FANCE_TOKEN_DATA.contractAddress.substring(0, 6)}...${FANCE_TOKEN_DATA.contractAddress.substring(FANCE_TOKEN_DATA.contractAddress.length - 4)}`
                             : 'Not available'}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Creator</span>
                         <span className="text-primary">
-                          {tokenData.creatorAddress 
-                            ? `${tokenData.creatorAddress.substring(0, 6)}...${tokenData.creatorAddress.substring(tokenData.creatorAddress.length - 4)}`
+                          {FANCE_TOKEN_DATA.creatorAddress 
+                            ? `${FANCE_TOKEN_DATA.creatorAddress.substring(0, 6)}...${FANCE_TOKEN_DATA.creatorAddress.substring(FANCE_TOKEN_DATA.creatorAddress.length - 4)}`
                             : 'Unknown'}
                         </span>
                       </div>
@@ -266,8 +195,32 @@ export default function TokenDetailPage() {
                 )}
                 
                 {activeTab === 'comments' && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-400">Comments coming soon!</p>
+                  <div className="space-y-4">
+                    <div className="bg-navy-700/50 p-3 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-2">
+                          V
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">VanceFan</p>
+                          <p className="text-xs text-gray-400">20 minutes ago</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-300">Fat Vance is revolutionizing DeFi! Can't wait to see what's next! 🚀</p>
+                    </div>
+                    
+                    <div className="bg-navy-700/50 p-3 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-2">
+                          F
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">FanceHolder</p>
+                          <p className="text-xs text-gray-400">2 hours ago</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-300">The community behind this token is amazing. Bullish on FANCE!</p>
+                    </div>
                   </div>
                 )}
                 
@@ -283,7 +236,7 @@ export default function TokenDetailPage() {
           {/* Right Column - Buy Panel */}
           <div className="space-y-6">
             <div className="bg-navy-600 rounded-xl p-4">
-              <h3 className="font-bold mb-4">Buy {tokenData.symbol}</h3>
+              <h3 className="font-bold mb-4">Buy {FANCE_TOKEN_DATA.symbol}</h3>
               
               <div className="space-y-4">
                 <div>
@@ -304,7 +257,7 @@ export default function TokenDetailPage() {
                 
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">You will receive:</span>
-                  <span className="font-medium">{calculateTokenAmount()} {tokenData.symbol}</span>
+                  <span className="font-medium">{calculateTokenAmount()} {FANCE_TOKEN_DATA.symbol}</span>
                 </div>
                 
                 <div className="flex justify-between text-sm">
@@ -316,7 +269,7 @@ export default function TokenDetailPage() {
                   className="btn btn-primary w-full mt-4"
                   disabled={!buyAmount || parseFloat(buyAmount) <= 0}
                 >
-                  Buy {tokenData.symbol}
+                  Buy {FANCE_TOKEN_DATA.symbol}
                 </button>
               </div>
             </div>
@@ -325,16 +278,19 @@ export default function TokenDetailPage() {
               <h3 className="font-bold mb-4">Similar Tokens</h3>
               
               <div className="space-y-3">
-                {['Moon Doge', 'Pixel Panda', 'Crypto Frog'].map((token, i) => (
+                {[
+                  { name: 'BWIRT', symbol: 'BWIRT', change: '+8.3%' },
+                  { name: 'Wrapped SOL', symbol: 'SOL', change: '+2.5%' }
+                ].map((token, i) => (
                   <div key={i} className="flex items-center p-2 hover:bg-navy-500 rounded-lg transition-colors cursor-pointer">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-navy font-bold text-sm mr-3">
-                      {token.charAt(0)}
+                      {token.symbol.charAt(0)}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">{token}</p>
-                      <p className="text-xs text-gray-400">${token.split(' ')[1].toUpperCase()}</p>
+                      <p className="font-medium">{token.name}</p>
+                      <p className="text-xs text-gray-400">${token.symbol}</p>
                     </div>
-                    <div className="text-green-500 text-sm">+{Math.floor(Math.random() * 20)}%</div>
+                    <div className="text-green-500 text-sm">{token.change}</div>
                   </div>
                 ))}
               </div>

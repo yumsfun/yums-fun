@@ -7,12 +7,14 @@ interface ProfessionalLogoProps {
   size?: number;
   showText?: boolean;
   onClick?: () => void;
+  autoAnimate?: boolean;
 }
 
 const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({ 
   size = 300, 
   showText = true,
-  onClick
+  onClick,
+  autoAnimate = true // Default to true for auto-animation
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
@@ -26,6 +28,17 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     }
   }, [isClicked]);
   
+  // Auto animation effect - triggers the click animation automatically
+  useEffect(() => {
+    if (!autoAnimate) return;
+    
+    const animationInterval = setInterval(() => {
+      setIsClicked(true);
+    }, 5000); // Trigger animation every 5 seconds
+    
+    return () => clearInterval(animationInterval);
+  }, [autoAnimate]);
+  
   const handleClick = () => {
     setIsClicked(true);
     if (onClick) onClick();
@@ -37,6 +50,8 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
   const primaryDark = "#E6BC00";
   const navyColor = "#12131A";
   const navyLight = "#2A2D3A";
+  const accentGreen = "#50E3C2";
+  const accentPink = "#FF6B8B";
   
   // Calculate dimensions based on size
   const viewBoxSize = 240;
@@ -77,7 +92,7 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     }
   };
   
-  const letterVariants: Variants = {
+  const foodElementsVariants: Variants = {
     initial: { scale: 1, rotate: 0 },
     hover: { scale: 1.1, rotate: 3, transition: { duration: 0.3 } },
     click: { 
@@ -96,7 +111,7 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     }
   };
   
-  // Coin burst animations
+  // Burst animations for fun food elements
   const burstVariants: Variants = {
     initial: { scale: 0, opacity: 0 },
     animate: (i: number) => ({
@@ -135,12 +150,12 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     }
   };
   
-  // Small currency symbols positions
-  const currencyPositions = [
-    { x: centerX, y: centerY - mainRadius * 0.85, symbol: '$' },
-    { x: centerX, y: centerY + mainRadius * 0.85, symbol: '¥' },
-    { x: centerX - mainRadius * 0.85, y: centerY, symbol: '€' },
-    { x: centerX + mainRadius * 0.85, y: centerY, symbol: '£' },
+  // Food elements positions
+  const foodPositions = [
+    { x: centerX, y: centerY - mainRadius * 0.85, element: '🍓', size: 12 },
+    { x: centerX, y: centerY + mainRadius * 0.85, element: '🍋', size: 12 },
+    { x: centerX - mainRadius * 0.85, y: centerY, element: '🍦', size: 12 },
+    { x: centerX + mainRadius * 0.85, y: centerY, element: '🍕', size: 12 },
   ];
   
   // Sparkle positions
@@ -150,23 +165,23 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     { x: centerX + 10, y: centerY + 25, delay: 1, size: 2 },
   ];
   
-  // Floating elements
+  // Floating elements (food crumbs)
   const floatingElements = [
-    { x: centerX + mainRadius * 0.7, y: centerY - mainRadius * 0.5, size: 4, delay: 0.7, color: primaryLight },
-    { x: centerX - mainRadius * 0.7, y: centerY + mainRadius * 0.5, size: 3, delay: 1.2, color: primaryDark },
+    { x: centerX + mainRadius * 0.7, y: centerY - mainRadius * 0.5, size: 4, delay: 0.7, color: accentPink },
+    { x: centerX - mainRadius * 0.7, y: centerY + mainRadius * 0.5, size: 3, delay: 1.2, color: accentGreen },
   ];
   
-  // Burst positions
-  const burstPositions = [
-    { x: centerX - 20, y: centerY - 20 },
-    { x: centerX + 20, y: centerY - 20 },
-    { x: centerX - 20, y: centerY + 20 },
-    { x: centerX + 20, y: centerY + 20 },
-    { x: centerX - 25, y: centerY },
-    { x: centerX + 25, y: centerY },
+  // Fun food burst elements
+  const burstElements = [
+    { x: centerX - 20, y: centerY - 20, element: '✨' },
+    { x: centerX + 20, y: centerY - 20, element: '✨' },
+    { x: centerX - 20, y: centerY + 20, element: '✨' },
+    { x: centerX + 20, y: centerY + 20, element: '✨' },
+    { x: centerX - 25, y: centerY, element: '✨' },
+    { x: centerX + 25, y: centerY, element: '✨' },
   ];
   
-  // Custom Y path for more stylish look - completely redesigned with a unique shape
+  // Y-shaped Fork path - main Y structure
   const yPath = `
     M${centerX - 20},${centerY - 35}
     Q${centerX - 10},${centerY - 35} ${centerX - 5},${centerY - 25}
@@ -184,18 +199,48 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
     Z
   `;
   
-  // Highlight path for the new Y design
-  const highlightPath = `
+  // Fork tines overlaid on the Y
+  const forkTinesPath = `
     M${centerX - 15},${centerY - 30}
-    Q${centerX - 10},${centerY - 28} ${centerX - 8},${centerY - 22}
-    L${centerX - 5},${centerY - 18}
+    L${centerX - 15},${centerY - 15}
+    M${centerX - 5},${centerY - 25}
+    L${centerX - 5},${centerY - 15}
+    M${centerX + 5},${centerY - 25}
+    L${centerX + 5},${centerY - 15}
+    M${centerX + 15},${centerY - 30}
+    L${centerX + 15},${centerY - 15}
+  `;
+  
+  // Plate/Bowl path beneath the Y
+  const platePath = `
+    M${centerX - 15},${centerY + 5}
+    Q${centerX},${centerY} ${centerX + 15},${centerY + 5}
+    Q${centerX + 20},${centerY + 10} ${centerX + 18},${centerY + 20}
+    Q${centerX + 10},${centerY + 30} ${centerX},${centerY + 32}
+    Q${centerX - 10},${centerY + 30} ${centerX - 18},${centerY + 20}
+    Q${centerX - 20},${centerY + 10} ${centerX - 15},${centerY + 5}
     Z
   `;
   
-  // Subtle accent details
-  const accentPath = `
+  // Steam/aroma paths
+  const steamPath1 = `
+    M${centerX - 8},${centerY - 5}
+    Q${centerX - 10},${centerY - 15} ${centerX - 5},${centerY - 20}
+    Q${centerX},${centerY - 25} ${centerX - 2},${centerY - 32}
+  `;
+  
+  const steamPath2 = `
+    M${centerX + 5},${centerY - 7}
+    Q${centerX + 7},${centerY - 17} ${centerX + 2},${centerY - 22}
+    Q${centerX - 3},${centerY - 27} ${centerX + 1},${centerY - 35}
+  `;
+  
+  // Food highlight path
+  const highlightPath = `
     M${centerX - 5},${centerY + 15}
-    Q${centerX},${centerY + 18} ${centerX + 5},${centerY + 15}
+    Q${centerX},${centerY + 20} ${centerX + 5},${centerY + 15}
+    Q${centerX + 3},${centerY + 25} ${centerX - 3},${centerY + 25}
+    Z
   `;
   
   return (
@@ -245,24 +290,34 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
             <stop offset="0%" stopColor="rgba(255,255,255,0)" />
             <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-            <animate attributeName="x1" from="-100%" to="100%" dur="2s" repeatCount="indefinite" />
-            <animate attributeName="x2" from="0%" to="200%" dur="2s" repeatCount="indefinite" />
           </linearGradient>
           
-          {/* Y Letter Gradient */}
+          {/* Y Gradient */}
           <linearGradient id="yGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={primaryLight} />
             <stop offset="50%" stopColor={primaryColor} />
             <stop offset="100%" stopColor={primaryDark} />
           </linearGradient>
           
-          {/* Y Letter Vertical Gradient */}
+          {/* Y Vertical Gradient */}
           <linearGradient id="yVerticalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={primaryLight} />
             <stop offset="100%" stopColor={primaryDark} />
           </linearGradient>
           
-          {/* 3D Effect for Y */}
+          {/* Food Element Gradients */}
+          <linearGradient id="plateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={primaryLight} />
+            <stop offset="70%" stopColor={primaryDark} />
+            <stop offset="100%" stopColor={primaryDark} />
+          </linearGradient>
+          
+          <linearGradient id="utensilGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#E0E0E0" />
+          </linearGradient>
+          
+          {/* 3D Effect */}
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color={navyColor} flood-opacity="0.5" />
           </filter>
@@ -324,8 +379,7 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
           r={mainRadius - 8}
           fill="url(#shineGradient)"
           opacity={0.2}
-        >
-        </circle>
+        />
         
         {/* Orbit Ring */}
         <motion.circle
@@ -342,14 +396,14 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
           style={{ transformOrigin: `${centerX}px ${centerY}px` }}
         />
         
-        {/* Y Letter - Custom Path */}
+        {/* Food Element Group with Y shape */}
         <motion.g
-          variants={letterVariants}
+          variants={foodElementsVariants}
           initial="initial"
           animate={isClicked ? "click" : isHovered ? "hover" : "initial"}
           style={{ transformOrigin: `${centerX}px ${centerY}px` }}
         >
-          {/* Shadow/3D effect base */}
+          {/* Shadow/3D effect base for Y */}
           <path
             d={yPath}
             fill={primaryDark}
@@ -373,20 +427,54 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
             opacity="0.7"
           />
           
-          {/* Highlight */}
+          {/* Fork tines overlay - decorative elements on the Y */}
+          <path
+            d={forkTinesPath}
+            fill="none"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity="0.7"
+          />
+          
+          {/* Plate/Bowl under Y */}
+          <path
+            d={platePath}
+            fill="url(#plateGradient)"
+            filter="url(#shadow)"
+            opacity="0.9"
+          />
+          
+          {/* Steam/Aroma Lines */}
+          <path
+            d={steamPath1}
+            fill="none"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity="0.7"
+            strokeDasharray="1 3"
+          >
+            <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite" />
+          </path>
+          
+          <path
+            d={steamPath2}
+            fill="none"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity="0.5"
+            strokeDasharray="1 3"
+          >
+            <animate attributeName="opacity" values="0.5;0.2;0.5" dur="4s" repeatCount="indefinite" />
+          </path>
+          
+          {/* Food Highlight */}
           <path
             d={highlightPath}
             fill="white"
-            opacity="0.2"
-          />
-          
-          {/* Additional details - subtle accent line */}
-          <path
-            d={accentPath}
-            fill="none"
-            stroke={primaryLight}
-            strokeWidth="1.5"
-            opacity="0.6"
+            opacity="0.3"
           />
           
           {/* Subtle dot accents */}
@@ -405,105 +493,81 @@ const ProfessionalLogo: React.FC<ProfessionalLogoProps> = ({
             fill="white"
             opacity="0.7"
           />
-          
-          {/* Bottom accent */}
-          <path
-            d={`M${centerX - 8},${centerY + 22} L${centerX + 0},${centerY + 22}`}
-            stroke={primaryLight}
-            strokeWidth="2"
-            strokeLinecap="round"
-            opacity="0.5"
-          />
         </motion.g>
         
-        {/* Currency Symbols */}
-        {currencyPositions.map((pos, index) => (
-          <motion.g key={index}
-            variants={coinVariants}
-            initial="initial"
-            animate={isClicked ? "click" : isHovered ? "hover" : "initial"}
+        {/* Food Icons at Cardinal Points */}
+        {foodPositions.map((pos, i) => (
+          <text
+            key={i}
+            x={pos.x}
+            y={pos.y}
+            fontSize={pos.size}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            opacity="0.9"
+            className="select-none"
           >
-            <circle
-              cx={pos.x}
-              cy={pos.y}
-              r={12}
-              fill="url(#coinGradient)"
+            {pos.element}
+          </text>
+        ))}
+        
+        {/* Sparkles */}
+        {sparklePositions.map((spark, i) => (
+          <circle
+            key={i}
+            cx={spark.x}
+            cy={spark.y}
+            r={spark.size}
+            fill="white"
+            opacity="0.7"
+          >
+            <animate 
+              attributeName="opacity" 
+              values="0.7;0.3;0.7" 
+              dur={`${1 + spark.delay}s`} 
+              repeatCount="indefinite" 
             />
-            <text
-              x={pos.x}
-              y={pos.y}
-              fontSize="14"
-              fontWeight="bold"
-              fill={navyColor}
+          </circle>
+        ))}
+        
+        {/* Floating dots */}
+        {floatingElements.map((elem, i) => (
+          <circle
+            key={i}
+            cx={elem.x}
+            cy={elem.y}
+            r={elem.size}
+            fill={elem.color}
+            opacity="0.7"
+          >
+            <animate 
+              attributeName="cy" 
+              values={`${elem.y};${elem.y - 10};${elem.y}`} 
+              dur={`${3 + elem.delay}s`} 
+              repeatCount="indefinite" 
+            />
+          </circle>
+        ))}
+        
+        {/* Burst Elements on Click */}
+        <AnimatePresence>
+          {isClicked && burstElements.map((burst, i) => (
+            <motion.text
+              key={i}
+              x={burst.x}
+              y={burst.y}
+              fontSize="20"
               textAnchor="middle"
               dominantBaseline="middle"
-            >
-              {pos.symbol}
-            </text>
-          </motion.g>
-        ))}
-        
-        {/* Sparkle Effects */}
-        {sparklePositions.map((sparkle, index) => (
-          <circle
-            key={`sparkle-${index}`}
-            cx={sparkle.x}
-            cy={sparkle.y}
-            r={sparkle.size}
-            fill="#FFFFFF"
-            opacity={0.8}
-          >
-            <animate
-              attributeName="opacity"
-              values="0.8;0.2;0.8"
-              dur="1.5s"
-              begin={`${sparkle.delay}s`}
-              repeatCount="indefinite"
-            />
-          </circle>
-        ))}
-        
-        {/* Floating Elements */}
-        {floatingElements.map((element, index) => (
-          <circle
-            key={`float-${index}`}
-            cx={element.x}
-            cy={element.y}
-            r={element.size}
-            fill={element.color}
-          >
-            <animate
-              attributeName="cy"
-              values={`${element.y};${element.y - 10};${element.y};${element.y + 10};${element.y}`}
-              dur="6s"
-              begin={`${element.delay}s`}
-              repeatCount="indefinite"
-            />
-            <animate
-              attributeName="cx"
-              values={`${element.x};${element.x + 5};${element.x + 10};${element.x + 5};${element.x}`}
-              dur="6s"
-              begin={`${element.delay}s`}
-              repeatCount="indefinite"
-            />
-          </circle>
-        ))}
-        
-        {/* Coin Burst Effect */}
-        <AnimatePresence>
-          {isClicked && burstPositions.map((pos, i) => (
-            <motion.circle
-              key={`burst-${i}`}
-              cx={pos.x}
-              cy={pos.y}
-              r={3}
-              fill={primaryColor}
               custom={i}
               variants={burstVariants}
               initial="initial"
               animate="animate"
               exit={{ opacity: 0 }}
-            />
+              className="select-none"
+            >
+              {burst.element}
+            </motion.text>
           ))}
         </AnimatePresence>
       </svg>

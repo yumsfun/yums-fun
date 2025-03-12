@@ -2,9 +2,14 @@
 
 import { FC, useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { createToken } from '@/firebase/tokenService';
+import { createSolanaToken, getConnection, checkWalletBalance } from '@/services/solanaTokenService';
 import { useRouter } from 'next/navigation';
+import { Connection } from '@solana/web3.js';
+import ErrorMessage from '@/components/ErrorMessage';
+import SuccessMessage from '@/components/SuccessMessage';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 interface TokenFormValues {
   name: string;
@@ -18,18 +23,44 @@ interface TokenFormValues {
 
 const TokenCreationForm: FC = () => {
   const router = useRouter();
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, wallet, signTransaction } = useWallet();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [tokenId, setTokenId] = useState<string>('');
+  const [tokenAddress, setTokenAddress] = useState<string>('');
+  const [txSignature, setTxSignature] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [solanaConnection, setSolanaConnection] = useState<Connection | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [hasEnoughSol, setHasEnoughSol] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
     // Trigger animations after component mounts
     setIsVisible(true);
-  }, []);
+    
+    // Initialize Solana connection
+    const initConnection = async () => {
+      try {
+        const connection = await getConnection('devnet');
+        setSolanaConnection(connection);
+        
+        // Check wallet balance if connected
+        if (publicKey) {
+          const { hasEnoughSol, balance } = await checkWalletBalance(connection, publicKey);
+          setWalletBalance(balance);
+          setHasEnoughSol(hasEnoughSol);
+        }
+      } catch (error) {
+        console.error('Failed to initialize Solana connection:', error);
+        setError('Failed to connect to Solana network. Please try again later.');
+      }
+    };
+    
+    initConnection();
+  }, [publicKey]);
   
   const [formValues, setFormValues] = useState<TokenFormValues>({
     name: '',
@@ -88,50 +119,79 @@ const TokenCreationForm: FC = () => {
   };
   
   const calculateFee = () => {
-    // Mock fee calculation in SOL
+    // Fee in SOL for token creation
     return 0.05;
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!publicKey || step !== 3) return;
+    if (!publicKey || step !== 3 || !solanaConnection || !wallet) {
+      setError('Wallet not connected or invalid state. Please try again.');
+      return;
+    }
     
     setIsLoading(true);
+    setError(null);
     
     try {
-      // Generate a random market cap between 100k and 5M
+      // Check wallet balance first
+      const { hasEnoughSol, balance } = await checkWalletBalance(solanaConnection, publicKey);
+      setWalletBalance(balance);
+      
+      if (!hasEnoughSol) {
+        setError(`Insufficient SOL balance. You need at least 0.05 SOL, but you have ${balance.toFixed(4)} SOL.`);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Creating token on Solana blockchain...');
+      
+      // Create token on Solana blockchain
+      const { signature, tokenAddress } = await createSolanaToken(
+        wallet,
+        solanaConnection,
+        {
+          name: formValues.name,
+          symbol: formValues.symbol,
+          decimals: 9, // Standard for Solana tokens
+          initialSupply: formValues.initialSupply,
+          taxFee: formValues.taxFee
+        }
+      );
+      
+      console.log('Token created on blockchain:', tokenAddress);
+      console.log('Transaction signature:', signature);
+      
+      // Save signature and token address
+      setTxSignature(signature);
+      setTokenAddress(tokenAddress);
+      
+      // Generate a random market cap between 100k and 5M for display purposes
       const marketCap = Math.floor(Math.random() * 4900000) + 100000;
       
-      // Random price change between -10% and +30%
+      // Random price change between -10% and +30% for display purposes
       const priceChange24h = (Math.random() * 40) - 10;
       
-      // Generate a random contract address for demo purposes
-      // In a real app, this would come from the blockchain
-      const contractAddress = `${publicKey.toString().substring(0, 6)}...${publicKey.toString().substring(publicKey.toString().length - 4)}`;
-      
-      // Prepare token data
+      // Prepare token data for Firebase
       const tokenData = {
         name: formValues.name,
         symbol: formValues.symbol,
         description: formValues.description || '',
-        // In a real app, we would upload the image to storage and get a URL
         logo: formValues.logoPreview || '',
         marketCap,
         priceChange24h,
         creatorAddress: publicKey.toString(),
-        contractAddress,
+        contractAddress: tokenAddress,
         initialSupply: formValues.initialSupply,
         taxFee: formValues.taxFee,
         createdAt: new Date().toISOString(),
+        transactionSignature: signature
       };
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Save to Firebase
       const newToken = await createToken(tokenData);
-      console.log('Token created:', newToken);
+      console.log('Token saved to Firebase:', newToken);
       
       // Save the token ID for navigation
       setTokenId(newToken.id || '');
@@ -140,8 +200,21 @@ const TokenCreationForm: FC = () => {
     } catch (error) {
       console.error('Error creating token:', error);
       setIsLoading(false);
-      // Handle error here
-      alert('Failed to create token. Please try again.');
+      
+      // Handle specific errors
+      if (error instanceof Error) {
+        if (error.message.includes('User rejected')) {
+          setError('Transaction was rejected by the wallet. Please try again.');
+        } else if (error.message.includes('insufficient funds')) {
+          setError('Insufficient SOL balance for this transaction.');
+        } else if (error.message.includes('RPC')) {
+          setError('Network connection issue. Please try again later.');
+        } else {
+          setError(`Failed to create token: ${error.message}`);
+        }
+      } else {
+        setError('Failed to create token. Please try again.');
+      }
     }
   };
   
@@ -161,10 +234,6 @@ const TokenCreationForm: FC = () => {
   }
   
   if (isSuccess) {
-    // Generate a transaction hash for demo purposes
-    const txHash = `${publicKey?.toString().substring(0, 4)}${Math.random().toString(36).substring(2, 10)}`;
-    const contractAddress = `${publicKey?.toString().substring(0, 6)}...${publicKey?.toString().substring(publicKey?.toString().length - 4)}`;
-    
     return (
       <div className="glass rounded-xl p-8 max-w-2xl mx-auto text-center animate-fadeIn">
         <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
@@ -195,11 +264,11 @@ const TokenCreationForm: FC = () => {
           
           <div className="flex items-center mb-2 justify-center">
             <span className="font-medium text-gray-300 mr-2">Token Address:</span>
-            <span className="text-primary">{contractAddress}</span>
+            <span className="text-primary">{tokenAddress}</span>
             <button 
               className="ml-2 text-gray-400 hover:text-primary transition-colors"
               onClick={() => {
-                navigator.clipboard.writeText(contractAddress);
+                navigator.clipboard.writeText(tokenAddress);
                 alert('Address copied to clipboard!');
               }}
             >
@@ -210,18 +279,28 @@ const TokenCreationForm: FC = () => {
           </div>
           <div className="flex items-center justify-center">
             <span className="font-medium text-gray-300 mr-2">Transaction:</span>
-            <span className="text-primary">{txHash}</span>
+            <span className="text-primary">{txSignature.substring(0, 8)}...{txSignature.substring(txSignature.length - 8)}</span>
             <button 
               className="ml-2 text-gray-400 hover:text-primary transition-colors"
               onClick={() => {
-                navigator.clipboard.writeText(txHash);
-                alert('Transaction hash copied to clipboard!');
+                navigator.clipboard.writeText(txSignature);
+                alert('Transaction signature copied to clipboard!');
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
             </button>
+          </div>
+          <div className="mt-4 text-center">
+            <a 
+              href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline text-sm"
+            >
+              View on Solana Explorer
+            </a>
           </div>
         </div>
         
@@ -238,6 +317,18 @@ const TokenCreationForm: FC = () => {
           >
             Back to Home
           </button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-navy-700/80 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="glass p-8 rounded-xl max-w-md w-full text-center">
+          <LoadingIndicator size="lg" message="Creating your token..." className="mb-4" />
+          <p className="text-gray-300 mb-2">Please approve the transaction in your wallet when prompted.</p>
+          <p className="text-xs text-gray-400">This may take up to a minute to complete.</p>
         </div>
       </div>
     );
@@ -471,6 +562,16 @@ const TokenCreationForm: FC = () => {
         <div className={`transition-all duration-300 ${step === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 absolute -translate-y-10 pointer-events-none'} ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           {step === 3 && (
             <div className="space-y-4">
+              {/* Display wallet balance warning if insufficient */}
+              {walletBalance !== null && !hasEnoughSol && (
+                <ErrorMessage 
+                  message={`Insufficient SOL Balance. You need at least 0.05 SOL to create a token. Your current balance is ${walletBalance.toFixed(4)} SOL.`}
+                />
+              )}
+              
+              {/* Display any errors */}
+              <ErrorMessage message={error} />
+              
               <div className="glass rounded-lg p-6 mb-6 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center mb-4">
                   {formValues.logoPreview ? (
@@ -509,8 +610,16 @@ const TokenCreationForm: FC = () => {
                   </div>
                   <div className="flex justify-between items-center py-2">
                     <span className="text-gray-400">Network:</span>
-                    <span className="text-white font-mono">Solana</span>
+                    <span className="text-white font-mono">Solana (Devnet)</span>
                   </div>
+                  {walletBalance !== null && (
+                    <div className="flex justify-between items-center py-2 border-t border-navy-500/50">
+                      <span className="text-gray-400">Your Balance:</span>
+                      <span className={`font-mono ${hasEnoughSol ? 'text-green-400' : 'text-red-400'}`}>
+                        {walletBalance.toFixed(4)} SOL
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {formValues.description && (
@@ -546,16 +655,13 @@ const TokenCreationForm: FC = () => {
                 <button
                   type="submit"
                   className="btn-modern-primary hover-glow"
-                  disabled={isLoading}
+                  disabled={isLoading || !hasEnoughSol}
                 >
                   {isLoading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-navy" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating Token...
-                    </>
+                    <div className="flex items-center">
+                      <LoadingIndicator size="sm" message={undefined} />
+                      <span className="ml-2">Creating Token...</span>
+                    </div>
                   ) : (
                     <>
                       Create Token

@@ -15,4 +15,5 @@ export interface Token {
   contractAddress?: string;
   initialSupply?: number;
   taxFee?: number;
+  transactionSignature?: string; // Solana transaction signature
 } 
