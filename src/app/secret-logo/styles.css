@@ -1,0 +1,141 @@
+/* Grid Pattern */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 209, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 209, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Float Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-5px) translateX(3px);
+  }
+  50% {
+    transform: translateY(0px) translateX(5px);
+  }
+  75% {
+    transform: translateY(5px) translateX(3px);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Glow Animation */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px 2px rgba(255, 209, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(255, 209, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px 2px rgba(255, 209, 0, 0.3);
+  }
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Hover Glow Effect */
+.hover-glow:hover {
+  box-shadow: 0 0 15px 3px rgba(255, 209, 0, 0.4);
+}
+
+/* Text Glow Effect */
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(255, 209, 0, 0.5));
+  text-shadow: 0 0 10px rgba(255, 209, 0, 0.3);
+  letter-spacing: 0.05em;
+}
+
+/* Coin Spin Animation */
+@keyframes coinSpin {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.animate-coin-spin {
+  animation: coinSpin 2s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Coin Burst Animations */
+@keyframes coinBurst1 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(-30px, -30px); opacity: 0; }
+}
+
+@keyframes coinBurst2 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(30px, -30px); opacity: 0; }
+}
+
+@keyframes coinBurst3 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(-30px, 30px); opacity: 0; }
+}
+
+@keyframes coinBurst4 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(30px, 30px); opacity: 0; }
+}
+
+@keyframes coinBurst5 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(-40px, 0); opacity: 0; }
+}
+
+@keyframes coinBurst6 {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(40px, 0); opacity: 0; }
+}
+
+.animate-coin-burst-1 {
+  animation: coinBurst1 0.8s ease-out forwards;
+}
+
+.animate-coin-burst-2 {
+  animation: coinBurst2 0.8s ease-out forwards;
+}
+
+.animate-coin-burst-3 {
+  animation: coinBurst3 0.8s ease-out forwards;
+}
+
+.animate-coin-burst-4 {
+  animation: coinBurst4 0.8s ease-out forwards;
+}
+
+.animate-coin-burst-5 {
+  animation: coinBurst5 0.8s ease-out forwards;
+}
+
+.animate-coin-burst-6 {
+  animation: coinBurst6 0.8s ease-out forwards;
+}
+
+/* Transparent Background Pattern */
+.transparent-bg {
+  background-color: transparent;
+  background-image: 
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+} 

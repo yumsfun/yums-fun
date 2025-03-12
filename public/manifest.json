@@ -1,0 +1,23 @@
+{
+  "name": "Yummy.fun - Launch your Solana token in seconds",
+  "short_name": "Yummy.fun",
+  "description": "The easiest way to create, launch and trade memecoins on Solana with no code required",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12131A",
+  "theme_color": "#FFD100",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+} 

@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yums.fun - Memecoin Launchpad
+
+Yums.fun is a modern memecoin launchpad built on Solana, allowing users to easily create and trade tokens with minimal effort. The platform features a sleek, user-friendly interface with a distinctive yellow branding.
+
+![Yums.fun Screenshot](https://placeholder.com/yums-screenshot.png)
+
+## Features
+
+- **Token Creation**: Create your own memecoin in minutes with a simple multi-step form
+- **Token Discovery**: Browse trending tokens and filter by categories
+- **Trading Interface**: Buy and sell tokens directly on the platform
+- **Watchlist**: Keep track of your favorite tokens
+- **Wallet Integration**: Seamless connection with popular Solana wallets
+
+## Tech Stack
+
+- **Frontend**: React, Next.js, TypeScript
+- **Styling**: Tailwind CSS
+- **Blockchain**: Solana web3.js
+- **Wallet Integration**: Solana Wallet Adapter
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js (v16 or higher)
+- npm or yarn
+- A Solana wallet (Phantom, Solflare, etc.)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/yums-fun.git
+   cd yums-fun
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## Project Structure
+
+```
+yums-fun/
+├── public/            # Static assets
+├── src/
+│   ├── app/           # Next.js app router pages
+│   ├── components/    # Reusable UI components
+│   ├── providers/     # Context providers
+│   ├── styles/        # Global styles
+│   └── utils/         # Utility functions
+├── tailwind.config.js # Tailwind CSS configuration
+└── next.config.js     # Next.js configuration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Components
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **TokenCard**: Displays individual token information in listings
+- **PriceChart**: Visualizes token price movements
+- **TokenCreationForm**: Multi-step form for creating new tokens
+- **Header**: Navigation and wallet connection
+- **TrendingTokens**: Displays trending tokens with filtering options
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+The application can be deployed to Vercel with a single click:
 
-To learn more about Next.js, take a look at the following resources:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fyums-fun)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Deploy on Vercel
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- Inspired by [pump.fun](https://pump.fun)
+- Built with [Next.js](https://nextjs.org/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)
+- Solana integration with [web3.js](https://solana-labs.github.io/solana-web3.js/)
