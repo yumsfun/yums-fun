@@ -5,36 +5,41 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import Header from '@/components/Header';
 import TokenCard from '@/components/TokenCard';
 import Link from 'next/link';
+import { TokenInfo } from '@/services/tokenDiscovery';
 
-// Mock watchlist data
-const MOCK_WATCHLIST = [
+// Mock watchlist data with correct TokenInfo interface
+const MOCK_WATCHLIST: TokenInfo[] = [
   {
-    id: 'bwirt',
+    address: '9XyPJ7WsYsQF3hGrFqgMrL9LGy7nKeDVM5L3F9WvVJjZ',
     name: 'BWIRT',
     symbol: 'BWIRT',
-    logo: '/tokens/bwirt.jpg',
-    marketCap: 4200000,
-    priceChange24h: 15.2,
-    createdAt: '2023-06-15T12:30:00Z',
-    creatorAddress: '7nZbHGwzFJ9Dz8uBeRLnmJeBrUVMS8C8YoycjgE3XJ11',
+    decimals: 9,
+    logoURI: '/tokens/bwirt.jpg',
+    createdAt: Date.now() - 24 * 60 * 60 * 1000, // 24 hours ago
+    liquidity: 4200000,
+    volume24h: 150000,
+    priceUsd: 0.042,
+    source: 'raydium'
   },
   {
-    id: 'fat-vance',
+    address: '7nZbHGwzFJ9Dz8uBeRLnmJeBrUVMS8C8YoycjgE3XJ11',
     name: 'FAT VANCE',
     symbol: 'FANCE',
-    logo: '/tokens/fv.jpg',
-    marketCap: 3700000,
-    priceChange24h: 8.3,
-    createdAt: '2023-06-25T14:45:00Z',
-    creatorAddress: '9XyPJ7WsYsQF3hGrFqgMrL9LGy7nKeDVM5L3F9WvVJjZ',
+    decimals: 9,
+    logoURI: '/tokens/fv.jpg',
+    createdAt: Date.now() - 48 * 60 * 60 * 1000, // 48 hours ago
+    liquidity: 3700000,
+    volume24h: 120000,
+    priceUsd: 0.037,
+    source: 'pump'
   },
 ];
 
 export default function WatchlistPage() {
   const { connected } = useWallet();
-  const [watchlist, setWatchlist] = useState(MOCK_WATCHLIST);
-  const [sortBy, setSortBy] = useState('marketCap');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [watchlist, setWatchlist] = useState<TokenInfo[]>(MOCK_WATCHLIST);
+  const [sortBy, setSortBy] = useState<'liquidity' | 'priceUsd' | 'name'>('liquidity');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   // Sort watchlist based on selected criteria
   useEffect(() => {
@@ -43,21 +48,25 @@ export default function WatchlistPage() {
         return sortOrder === 'asc' 
           ? a.name.localeCompare(b.name) 
           : b.name.localeCompare(a.name);
-      } else if (sortBy === 'priceChange24h') {
+      } else if (sortBy === 'priceUsd') {
+        const priceA = a.priceUsd || 0;
+        const priceB = b.priceUsd || 0;
         return sortOrder === 'asc' 
-          ? a.priceChange24h - b.priceChange24h 
-          : b.priceChange24h - a.priceChange24h;
-      } else { // marketCap
+          ? priceA - priceB 
+          : priceB - priceA;
+      } else { // liquidity
+        const liquidityA = a.liquidity || 0;
+        const liquidityB = b.liquidity || 0;
         return sortOrder === 'asc' 
-          ? a.marketCap - b.marketCap 
-          : b.marketCap - a.marketCap;
+          ? liquidityA - liquidityB 
+          : liquidityB - liquidityA;
       }
     });
     
     setWatchlist(sortedWatchlist);
   }, [sortBy, sortOrder]);
   
-  const handleSort = (criteria: string) => {
+  const handleSort = (criteria: typeof sortBy) => {
     if (sortBy === criteria) {
       // Toggle sort order if clicking the same criteria
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -68,8 +77,8 @@ export default function WatchlistPage() {
     }
   };
   
-  const removeFromWatchlist = (id: string) => {
-    setWatchlist(watchlist.filter(token => token.id !== id));
+  const removeFromWatchlist = (address: string) => {
+    setWatchlist(watchlist.filter(token => token.address !== address));
   };
   
   if (!connected) {
@@ -113,16 +122,16 @@ export default function WatchlistPage() {
               <div className="flex items-center space-x-2 text-sm">
                 <span className="text-gray-400">Sort by:</span>
                 <button 
-                  className={`px-3 py-1 rounded-full ${sortBy === 'marketCap' ? 'bg-primary text-navy' : 'bg-navy-600 text-gray-300'}`}
-                  onClick={() => handleSort('marketCap')}
+                  className={`px-3 py-1 rounded-full ${sortBy === 'liquidity' ? 'bg-primary text-navy' : 'bg-navy-600 text-gray-300'}`}
+                  onClick={() => handleSort('liquidity')}
                 >
-                  Market Cap {sortBy === 'marketCap' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Liquidity {sortBy === 'liquidity' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </button>
                 <button 
-                  className={`px-3 py-1 rounded-full ${sortBy === 'priceChange24h' ? 'bg-primary text-navy' : 'bg-navy-600 text-gray-300'}`}
-                  onClick={() => handleSort('priceChange24h')}
+                  className={`px-3 py-1 rounded-full ${sortBy === 'priceUsd' ? 'bg-primary text-navy' : 'bg-navy-600 text-gray-300'}`}
+                  onClick={() => handleSort('priceUsd')}
                 >
-                  Price Change {sortBy === 'priceChange24h' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  Price {sortBy === 'priceUsd' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </button>
                 <button 
                   className={`px-3 py-1 rounded-full ${sortBy === 'name' ? 'bg-primary text-navy' : 'bg-navy-600 text-gray-300'}`}
@@ -136,11 +145,11 @@ export default function WatchlistPage() {
             {/* Watchlist */}
             <div className="space-y-4">
               {watchlist.map((token) => (
-                <div key={token.id} className="relative group">
-                  <TokenCard {...token} />
+                <div key={token.address} className="relative group">
+                  <TokenCard token={token} showSource={true} />
                   <button
                     className="absolute top-2 right-2 bg-navy-700 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeFromWatchlist(token.id)}
+                    onClick={() => removeFromWatchlist(token.address)}
                     title="Remove from watchlist"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

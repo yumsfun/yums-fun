@@ -10,6 +10,7 @@ export default function NewTokens() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('NewTokens: Setting up Firebase listener...');
     // Create a query for the latest tokens
     const tokensRef = ref(db, 'tokens');
     const tokensQuery = query(
@@ -18,20 +19,36 @@ export default function NewTokens() {
       limitToLast(config.tokenDiscovery.maxTokensToDisplay)
     );
 
+    console.log('NewTokens: Query configured', {
+      maxTokens: config.tokenDiscovery.maxTokensToDisplay
+    });
+
     // Subscribe to real-time updates
     const unsubscribe = onValue(tokensQuery, (snapshot) => {
+      console.log('NewTokens: Received Firebase update');
       const tokensData = snapshot.val();
       if (tokensData) {
+        console.log('NewTokens: Data received', {
+          tokenCount: Object.keys(tokensData).length
+        });
         const tokensList = Object.values(tokensData) as TokenInfo[];
         // Sort by creation time, newest first
         tokensList.sort((a, b) => b.createdAt - a.createdAt);
         setTokens(tokensList);
+      } else {
+        console.log('NewTokens: No tokens data found');
       }
+      setLoading(false);
+    }, (error) => {
+      console.error('NewTokens: Firebase error:', error);
       setLoading(false);
     });
 
     // Cleanup subscription
-    return () => unsubscribe();
+    return () => {
+      console.log('NewTokens: Cleaning up Firebase listener');
+      unsubscribe();
+    };
   }, []);
 
   if (loading) {
@@ -46,6 +63,10 @@ export default function NewTokens() {
       </div>
     );
   }
+
+  console.log('NewTokens: Rendering', {
+    tokenCount: tokens.length
+  });
 
   return (
     <div>

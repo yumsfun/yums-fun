@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import WalletContextProvider from "@/providers/WalletContextProvider";
+import TokenDiscoveryProvider from "@/components/TokenDiscoveryProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,7 +34,9 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-navy text-white min-h-screen`}
       >
         <WalletContextProvider>
-          {children}
+          <TokenDiscoveryProvider>
+            {children}
+          </TokenDiscoveryProvider>
         </WalletContextProvider>
       </body>
     </html>

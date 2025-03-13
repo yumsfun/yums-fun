@@ -1,8 +1,8 @@
 // Firebase configuration
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getDatabase, ref, set, get, Database } from 'firebase/database';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,10 +16,49 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+// Log Firebase configuration (without sensitive data)
+console.log('Firebase Config:', {
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasAuthDomain: !!firebaseConfig.authDomain,
+  hasDatabaseURL: !!firebaseConfig.databaseURL,
+  hasProjectId: !!firebaseConfig.projectId,
+  configComplete: Object.values(firebaseConfig).every(value => !!value)
+});
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-const firestore = getFirestore(app);
+let app: FirebaseApp;
+let db: Database;
+let auth: Auth;
+let firestore: Firestore;
+
+try {
+  app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  auth = getAuth(app);
+  firestore = getFirestore(app);
+  console.log('Firebase initialized successfully');
+} catch (error) {
+  console.error('Error initializing Firebase:', error);
+  throw error; // Re-throw to prevent usage if initialization fails
+}
+
+// Test Firebase connection
+export async function testFirebaseConnection() {
+  try {
+    const testRef = ref(db, 'connectionTest');
+    const timestamp = Date.now();
+    await set(testRef, { timestamp });
+    const snapshot = await get(testRef);
+    const data = snapshot.val();
+    console.log('Firebase connection test:', {
+      success: data?.timestamp === timestamp,
+      data
+    });
+    return true;
+  } catch (error) {
+    console.error('Firebase connection test failed:', error);
+    return false;
+  }
+}
 
 export { app, db, auth, firestore };

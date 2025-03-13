@@ -2,6 +2,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { ref, set, get } from 'firebase/database';
 import { db } from '@/firebase/config';
 import { config } from '@/config/env';
+import { testFirebaseConnection } from '@/firebase/config';
 
 export interface TokenInfo {
   address: string;
@@ -22,7 +23,36 @@ export class TokenDiscoveryService {
 
   constructor(rpcUrl: string) {
     this.connection = new Connection(rpcUrl);
-    this.lastCheckTimestamp = Date.now();
+    // Set initial timestamp to 1 hour ago to catch recent tokens on startup
+    this.lastCheckTimestamp = Date.now() - 60 * 60 * 1000;
+  }
+
+  public async initialize() {
+    console.log('TokenDiscoveryService: Testing Firebase connection...');
+    const isConnected = await testFirebaseConnection();
+    if (!isConnected) {
+      throw new Error('Failed to connect to Firebase');
+    }
+    console.log('TokenDiscoveryService: Firebase connection successful');
+  }
+
+  private async getLastSavedTokenTimestamp(): Promise<number> {
+    try {
+      const tokensRef = ref(db, 'tokens');
+      const snapshot = await get(tokensRef);
+      if (!snapshot.exists()) return this.lastCheckTimestamp;
+
+      const tokens = Object.values(snapshot.val()) as TokenInfo[];
+      const latestToken = tokens.reduce((latest, token) => 
+        token.createdAt > latest.createdAt ? token : latest
+      );
+
+      // Return the latest token's timestamp or fallback to constructor timestamp
+      return latestToken ? latestToken.createdAt : this.lastCheckTimestamp;
+    } catch (error) {
+      console.error('Error getting last saved token timestamp:', error);
+      return this.lastCheckTimestamp;
+    }
   }
 
   private async fetchRaydiumNewTokens(): Promise<TokenInfo[]> {
@@ -98,6 +128,10 @@ export class TokenDiscoveryService {
 
   public async monitorNewTokens() {
     try {
+      // Get the latest token timestamp from the database
+      this.lastCheckTimestamp = await this.getLastSavedTokenTimestamp();
+      console.log('TokenDiscoveryService: Checking for tokens since', new Date(this.lastCheckTimestamp).toISOString());
+
       // Fetch new tokens from both sources
       const [raydiumTokens, pumpTokens] = await Promise.all([
         this.fetchRaydiumNewTokens(),
@@ -124,6 +158,25 @@ export class TokenDiscoveryService {
     } catch (error) {
       console.error('Error monitoring new tokens:', error);
       return [];
+    }
+  }
+
+  async fetchNewTokens(): Promise<TokenInfo[]> {
+    console.log('TokenDiscoveryService: Fetching new tokens...');
+    try {
+      const newTokens = await this.monitorNewTokens();
+      console.log('TokenDiscoveryService: Found tokens:', {
+        count: newTokens.length,
+        tokens: newTokens.map(t => ({
+          symbol: t.symbol,
+          source: t.source,
+          liquidity: t.liquidity
+        }))
+      });
+      return newTokens;
+    } catch (error) {
+      console.error('TokenDiscoveryService: Error fetching tokens:', error);
+      throw error;
     }
   }
 } 
