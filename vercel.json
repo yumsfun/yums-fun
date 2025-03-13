@@ -26,6 +26,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_SITE_URL": "https://yummy.fun"
+    "NEXT_PUBLIC_SITE_URL": "https://yums.fun"
   }
 } 

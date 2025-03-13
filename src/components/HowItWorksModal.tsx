@@ -36,7 +36,7 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ buttonClassName = '' 
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                How Yummy.Fun Works
+                How Yums.Fun Works
               </h3>
               <button 
                 onClick={closeModal}
@@ -58,7 +58,7 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ buttonClassName = '' 
                     Creating Tokens
                   </h4>
                   <div className="ml-9 space-y-2 text-gray-300">
-                    <p>Creating a new token on Yummy.Fun is simple and fun:</p>
+                    <p>Creating a new token on Yums.Fun is simple and fun:</p>
                     <ol className="list-decimal ml-5 space-y-1">
                       <li>Click the "Create Token" button in the navigation bar</li>
                       <li>Fill out the token details including name, symbol, and description</li>

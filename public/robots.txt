@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://yummy.fun
+Host: https://yums.fun
 
 # Sitemaps
-Sitemap: https://yummy.fun/sitemap.xml
+Sitemap: https://yums.fun/sitemap.xml

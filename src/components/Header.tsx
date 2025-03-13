@@ -8,6 +8,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import HowItWorksModal from '@/components/HowItWorksModal';
 import ClientWalletButton from '@/components/ClientWalletButton';
 import WalletStatus from '@/components/WalletStatus';
+import ChatButton from '@/components/ChatButton';
 
 const Header = () => {
   const { publicKey } = useWallet();
