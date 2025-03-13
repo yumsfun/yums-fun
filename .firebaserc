@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "yums-e0b5d"
-  }
+  },
+  "targets": {
+    "yums-e0b5d": {
+      "hosting": {
+        "yums-fun": [
+          "yums-fun"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
